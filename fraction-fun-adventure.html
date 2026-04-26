@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fraction Fun Adventure! 🌟</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap');
+
+  :root {
+    --blue: #4A90E2;
+    --green: #5CB85C;
+    --purple: #9B59B6;
+    --yellow: #F5A623;
+    --pink: #FF6B9D;
+    --orange: #FF8C42;
+    --bg: #FFF8F0;
+    --card: #FFFFFF;
+    --text: #2D2D2D;
+    --radius: 24px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated background blobs */
+  .bg-blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.15;
+    animation: float 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .bg-blob:nth-child(1) { width: 400px; height: 400px; background: #FF6B9D; top: -100px; left: -100px; animation-delay: 0s; }
+  .bg-blob:nth-child(2) { width: 350px; height: 350px; background: #4A90E2; bottom: -80px; right: -80px; animation-delay: 3s; }
+  .bg-blob:nth-child(3) { width: 300px; height: 300px; background: #F5A623; top: 40%; left: 60%; animation-delay: 5s; }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(20px, -20px) scale(1.05); }
+  }
+
+  .screen { display: none; position: relative; z-index: 1; }
+  .screen.active { display: block; animation: fadeIn 0.4s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== HOME SCREEN ===== */
+  #home-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .mascot {
+    font-size: 80px;
+    animation: bounce 2s ease-in-out infinite;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-15px) rotate(5deg); }
+  }
+
+  .main-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    background: linear-gradient(135deg, #FF6B9D, #F5A623, #4A90E2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    text-shadow: none;
+  }
+
+  .subtitle {
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    color: #666;
+    font-weight: 700;
+    margin-bottom: 40px;
+    max-width: 500px;
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    max-width: 620px;
+    width: 100%;
+    margin-bottom: 32px;
+  }
+
+  .cat-btn {
+    background: white;
+    border: 3px solid transparent;
+    border-radius: 20px;
+    padding: 22px 16px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: clamp(0.85rem, 2.5vw, 1rem);
+    color: var(--text);
+    transition: all 0.2s ease;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cat-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.08;
+    border-radius: 18px;
+  }
+
+  .cat-btn[data-type="like-add"] { border-color: var(--blue); }
+  .cat-btn[data-type="like-add"]::before { background: var(--blue); }
+  .cat-btn[data-type="like-add"] .cat-icon { background: var(--blue); }
+
+  .cat-btn[data-type="like-sub"] { border-color: var(--green); }
+  .cat-btn[data-type="like-sub"]::before { background: var(--green); }
+  .cat-btn[data-type="like-sub"] .cat-icon { background: var(--green); }
+
+  .cat-btn[data-type="unlike-add"] { border-color: var(--purple); }
+  .cat-btn[data-type="unlike-add"]::before { background: var(--purple); }
+  .cat-btn[data-type="unlike-add"] .cat-icon { background: var(--purple); }
+
+  .cat-btn[data-type="unlike-sub"] { border-color: var(--yellow); }
+  .cat-btn[data-type="unlike-sub"]::before { background: var(--yellow); }
+  .cat-btn[data-type="unlike-sub"] .cat-icon { background: var(--yellow); }
+
+  .cat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .cat-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 0 rgba(0,0,0,0.12);
+  }
+  .cat-btn:active { transform: translateY(0); box-shadow: 0 3px 0 rgba(0,0,0,0.1); }
+
+  .cat-label { line-height: 1.3; text-align: center; }
+
+  .star-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: white;
+    font-weight: 800;
+    font-size: 0.85rem;
+    padding: 8px 18px;
+    border-radius: 50px;
+    box-shadow: 0 4px 12px rgba(255,165,0,0.4);
+  }
+
+  /* ===== GAME SCREEN ===== */
+  #game-screen {
+    min-height: 100vh;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .game-header {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .back-btn {
+    background: white;
+    border: 2px solid #E0E0E0;
+    border-radius: 50px;
+    padding: 8px 18px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #666;
+    transition: all 0.2s;
+  }
+  .back-btn:hover { background: #f5f5f5; transform: translateX(-2px); }
+
+  .score-display {
+    background: white;
+    border-radius: 50px;
+    padding: 8px 20px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .score-display span { color: var(--orange); }
+
+  .q-counter {
+    margin-left: auto;
+    background: white;
+    border-radius: 50px;
+    padding: 8px 20px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    color: #666;
+  }
+
+  .progress-bar-wrap {
+    width: 100%;
+    max-width: 700px;
+    background: rgba(0,0,0,0.06);
+    border-radius: 50px;
+    height: 10px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 50px;
+    background: linear-gradient(90deg, #FF6B9D, #F5A623);
+    transition: width 0.5s ease;
+  }
+
+  .category-badge {
+    padding: 6px 18px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: white;
+    margin-bottom: 20px;
+    display: inline-block;
+  }
+
+  .question-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: clamp(24px, 5vw, 40px);
+    max-width: 700px;
+    width: 100%;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .question-label {
+    font-weight: 700;
+    color: #999;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .fraction-equation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(12px, 3vw, 24px);
+    flex-wrap: wrap;
+    margin: 16px 0;
+  }
+
+  .fraction {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 6vw, 3rem);
+    line-height: 1;
+    position: relative;
+  }
+
+  .fraction .numerator { padding-bottom: 4px; }
+  .fraction .fraction-bar {
+    width: 100%;
+    min-width: 40px;
+    height: 4px;
+    background: var(--text);
+    border-radius: 2px;
+    margin: 2px 0;
+  }
+  .fraction .denominator { padding-top: 4px; }
+
+  .op-symbol {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 6vw, 3rem);
+    color: #999;
+  }
+
+  .equals-sign {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 6vw, 3rem);
+    color: #999;
+  }
+
+  .question-mark {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.5rem, 7vw, 3.5rem);
+    color: var(--orange);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+
+  .answers-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    max-width: 700px;
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .ans-btn {
+    background: white;
+    border: 3px solid #E8E8E8;
+    border-radius: 18px;
+    padding: 18px 12px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1rem, 3vw, 1.1rem);
+    color: var(--text);
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 0 #E0E0E0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+  }
+
+  .ans-btn:hover:not(:disabled) {
+    border-color: var(--blue);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 0 #C8D8F0;
+  }
+
+  .ans-btn.correct {
+    border-color: var(--green);
+    background: #F0FFF4;
+    box-shadow: 0 4px 0 #A8D8A8;
+    animation: correctPop 0.4s ease;
+  }
+
+  .ans-btn.incorrect {
+    border-color: #FF4444;
+    background: #FFF0F0;
+    box-shadow: 0 4px 0 #FFB8B8;
+    animation: shake 0.4s ease;
+  }
+
+  @keyframes correctPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .ans-btn .frac-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.2rem, 4vw, 1.6rem);
+    line-height: 1;
+  }
+
+  .ans-btn .frac-display .fbar {
+    width: 100%;
+    min-width: 30px;
+    height: 3px;
+    background: currentColor;
+    margin: 3px 0;
+    border-radius: 2px;
+  }
+
+  .feedback-box {
+    max-width: 700px;
+    width: 100%;
+    min-height: 60px;
+    text-align: center;
+    padding: 14px 20px;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: clamp(1rem, 2.5vw, 1.15rem);
+    transition: all 0.3s;
+    display: none;
+  }
+
+  .feedback-box.show { display: block; animation: fadeIn 0.3s ease; }
+  .feedback-box.success { background: #F0FFF4; color: #2D8A4E; border: 2px solid #A8D8A8; }
+  .feedback-box.error { background: #FFF0F0; color: #CC3333; border: 2px solid #FFB8B8; }
+
+  .next-btn {
+    background: linear-gradient(135deg, #FF6B9D, #F5A623);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 40px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 6px 0 rgba(245,166,35,0.4);
+    transition: all 0.2s;
+    margin-top: 12px;
+    display: none;
+  }
+
+  .next-btn.show { display: inline-block; animation: fadeIn 0.3s ease; }
+  .next-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 0 rgba(245,166,35,0.4); }
+  .next-btn:active { transform: translateY(0); box-shadow: 0 3px 0 rgba(245,166,35,0.4); }
+
+  /* ===== RESULTS SCREEN ===== */
+  #results-screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+
+  .results-card {
+    background: white;
+    border-radius: 32px;
+    padding: clamp(28px, 6vw, 50px);
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+  }
+
+  .badge-display {
+    font-size: 80px;
+    margin-bottom: 8px;
+    animation: bounceIn 0.6s ease;
+  }
+
+  @keyframes bounceIn {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  .badge-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+  }
+
+  .final-score-big {
+    font-family: 'Fredoka One', cursive;
+    font-size: 4rem;
+    background: linear-gradient(135deg, #FF6B9D, #F5A623);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 12px 0;
+  }
+
+  .final-msg {
+    font-weight: 700;
+    color: #666;
+    font-size: 1.05rem;
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .play-again-btn {
+    background: linear-gradient(135deg, #4A90E2, #9B59B6);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 16px 48px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    cursor: pointer;
+    box-shadow: 0 6px 0 rgba(74,144,226,0.4);
+    transition: all 0.2s;
+    margin-right: 12px;
+  }
+
+  .play-again-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 0 rgba(74,144,226,0.4); }
+
+  .change-mode-btn {
+    background: white;
+    color: #666;
+    border: 3px solid #E0E0E0;
+    border-radius: 50px;
+    padding: 14px 32px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+  }
+  .change-mode-btn:hover { border-color: #999; transform: translateY(-2px); }
+
+  /* ===== CONFETTI ===== */
+  .confetti-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    top: -20px;
+    animation: confettiFall linear forwards;
+    border-radius: 2px;
+  }
+
+  @keyframes confettiFall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ===== TIMER ===== */
+  .timer-ring {
+    width: 54px;
+    height: 54px;
+    position: relative;
+    margin-left: auto;
+  }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-ring circle {
+    fill: none;
+    stroke-width: 4;
+  }
+  .timer-ring .bg { stroke: #E8E8E8; }
+  .timer-ring .fg { stroke: var(--orange); stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .timer-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    color: var(--text);
+  }
+
+  /* ===== SETTINGS BAR ===== */
+  .settings-bar {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+  }
+
+  .icon-btn {
+    background: white;
+    border: 2px solid #E0E0E0;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .icon-btn:hover { transform: scale(1.1); border-color: #999; }
+  .icon-btn.active { background: #FFF8E1; border-color: var(--yellow); }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .category-grid { grid-template-columns: 1fr 1fr; }
+    .answers-grid { grid-template-columns: 1fr 1fr; }
+    .cat-btn { padding: 16px 10px; }
+    .cat-icon { width: 44px; height: 44px; font-size: 22px; }
+    .results-card { padding: 24px 20px; }
+  }
+
+  @media (max-width: 360px) {
+    .category-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Dark mode */
+  body.dark {
+    --bg: #1A1A2E;
+    --card: #16213E;
+    --text: #F0F0F0;
+  }
+  body.dark .question-card,
+  body.dark .ans-btn,
+  body.dark .back-btn,
+  body.dark .score-display,
+  body.dark .q-counter,
+  body.dark .cat-btn,
+  body.dark .results-card,
+  body.dark .icon-btn {
+    background: #16213E;
+    color: #F0F0F0;
+    border-color: #2D3561;
+    box-shadow: 0 4px 0 #0F3460;
+  }
+  body.dark .fraction-bar { background: #F0F0F0; }
+  body.dark .fbar { background: #F0F0F0 !important; }
+  body.dark .op-symbol, body.dark .equals-sign { color: #aaa; }
+</style>
+</head>
+<body>
+
+<!-- Background blobs -->
+<div class="bg-blob"></div>
+<div class="bg-blob"></div>
+<div class="bg-blob"></div>
+
+<!-- Confetti container -->
+<div class="confetti-container" id="confetti-container"></div>
+
+<!-- Settings buttons -->
+<div class="settings-bar">
+  <button class="icon-btn" id="sound-btn" title="Toggle Sound">🔊</button>
+  <button class="icon-btn" id="dark-btn" title="Toggle Dark Mode">🌙</button>
+</div>
+
+<!-- ===== HOME SCREEN ===== -->
+<div id="home-screen" class="screen active">
+  <span class="mascot">🧮</span>
+  <h1 class="main-title">Fraction Fun<br>Adventure!</h1>
+  <p class="subtitle">Choose your challenge and become a Fraction Master! 🌟</p>
+
+  <div class="category-grid">
+    <button class="cat-btn" data-type="like-add" onclick="startGame('like-add')">
+      <div class="cat-icon">➕</div>
+      <div class="cat-label">Addition of<br>Like Fractions</div>
+    </button>
+    <button class="cat-btn" data-type="like-sub" onclick="startGame('like-sub')">
+      <div class="cat-icon">➖</div>
+      <div class="cat-label">Subtraction of<br>Like Fractions</div>
+    </button>
+    <button class="cat-btn" data-type="unlike-add" onclick="startGame('unlike-add')">
+      <div class="cat-icon">🔀</div>
+      <div class="cat-label">Addition of<br>Unlike Fractions</div>
+    </button>
+    <button class="cat-btn" data-type="unlike-sub" onclick="startGame('unlike-sub')">
+      <div class="cat-icon">🔁</div>
+      <div class="cat-label">Subtraction of<br>Unlike Fractions</div>
+    </button>
+  </div>
+
+  <div class="star-badge">⭐ 10 Questions Per Game &nbsp;|&nbsp; Earn Your Badge!</div>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div id="game-screen" class="screen">
+  <div class="game-header">
+    <button class="back-btn" onclick="goHome()">← Home</button>
+    <div class="score-display">⭐ Score: <span id="score-val">0</span></div>
+    <div class="q-counter" id="q-counter">Q 1/10</div>
+    <div class="timer-ring" id="timer-ring">
+      <svg width="54" height="54" viewBox="0 0 54 54">
+        <circle class="bg" cx="27" cy="27" r="23"/>
+        <circle class="fg" id="timer-circle" cx="27" cy="27" r="23"
+          stroke-dasharray="144.51" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-text" id="timer-text">15</div>
+    </div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+
+  <div class="category-badge" id="cat-badge">Like Fractions ➕</div>
+
+  <div class="question-card">
+    <div class="question-label">What is the answer?</div>
+    <div class="fraction-equation" id="fraction-eq"></div>
+  </div>
+
+  <div class="answers-grid" id="answers-grid"></div>
+  <div class="feedback-box" id="feedback-box"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question →</button>
+</div>
+
+<!-- ===== RESULTS SCREEN ===== -->
+<div id="results-screen" class="screen">
+  <div class="results-card">
+    <div class="badge-display" id="badge-display">🥇</div>
+    <div class="badge-name" id="badge-name">Gold Fraction Master!</div>
+    <div class="final-score-big" id="final-score">10/10</div>
+    <div class="final-msg" id="final-msg">Amazing! You got every single question right! You're a true Fraction Superstar! 🌟</div>
+    <button class="play-again-btn" onclick="playAgain()">Play Again! 🔄</button>
+    <br>
+    <button class="change-mode-btn" onclick="goHome()">Choose Different Mode</button>
+  </div>
+</div>
+
+<script>
+// ===================== MATH UTILITIES =====================
+function gcd(a, b) {
+  a = Math.abs(a); b = Math.abs(b);
+  while (b) { [a, b] = [b, a % b]; }
+  return a;
+}
+
+function lcm(a, b) {
+  return (a * b) / gcd(a, b);
+}
+
+function simplify(num, den) {
+  if (num === 0) return { num: 0, den: 1 };
+  const g = gcd(Math.abs(num), Math.abs(den));
+  return { num: num / g, den: den / g };
+}
+
+function fractionStr(num, den) {
+  return `${num}/${den}`;
+}
+
+// ===================== QUESTION GENERATORS =====================
+
+const LIKE_DENOMS = [2, 3, 4, 5, 6, 8, 10, 12];
+const UNLIKE_PAIRS = [
+  [2,4],[2,6],[2,8],[2,10],[2,12],
+  [3,6],[3,9],[3,12],[4,8],[4,12],
+  [5,10],[6,12],[3,4],[3,8],[4,6],[5,6]
+];
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function generateLikeAdd() {
+  const den = pick(LIKE_DENOMS);
+  const a = randInt(1, den - 1);
+  const b = randInt(1, den - a); // ensure sum <= den
+  const rawNum = a + b;
+  const result = simplify(rawNum, den);
+  return { a, b, den, op: '+', correct: result };
+}
+
+function generateLikeSub() {
+  const den = pick(LIKE_DENOMS);
+  const a = randInt(2, den - 1);
+  const b = randInt(1, a - 1); // ensure a > b, positive result
+  const rawNum = a - b;
+  const result = simplify(rawNum, den);
+  return { a, b, den, op: '-', correct: result };
+}
+
+function generateUnlikeAdd() {
+  const pair = pick(UNLIKE_PAIRS);
+  const [d1, d2] = Math.random() > 0.5 ? pair : [pair[1], pair[0]];
+  const a = randInt(1, d1 - 1);
+  const b = randInt(1, d2 - 1);
+  const lcd = lcm(d1, d2);
+  const rawNum = a * (lcd / d1) + b * (lcd / d2);
+  const result = simplify(rawNum, lcd);
+  return { a, b, d1, d2, op: '+', correct: result };
+}
+
+function generateUnlikeSub() {
+  let pair, d1, d2, a, b, rawNum;
+  let attempts = 0;
+  do {
+    pair = pick(UNLIKE_PAIRS);
+    [d1, d2] = Math.random() > 0.5 ? pair : [pair[1], pair[0]];
+    a = randInt(1, d1 - 1);
+    b = randInt(1, d2 - 1);
+    const lcd = lcm(d1, d2);
+    rawNum = a * (lcd / d1) - b * (lcd / d2);
+    attempts++;
+  } while (rawNum <= 0 && attempts < 50);
+  
+  const lcd = lcm(d1, d2);
+  const result = simplify(rawNum, lcd);
+  return { a, b, d1, d2, op: '-', correct: result };
+}
+
+// ===================== WRONG ANSWER GENERATORS =====================
+
+function generateWrongAnswers(qData, correct, type) {
+  const wrongs = new Set();
+  const correctStr = fractionStr(correct.num, correct.den);
+
+  const addWrong = (n, d) => {
+    if (d <= 0 || n <= 0) return;
+    const s = simplify(n, d);
+    if (s.num <= 0) return;
+    const str = fractionStr(s.num, s.den);
+    if (str !== correctStr) wrongs.add(str);
+  };
+
+  if (type === 'like-add' || type === 'like-sub') {
+    const { a, b, den, op } = qData;
+    if (op === '+') {
+      addWrong(a + b, a + b); // add both num AND denom (common mistake)
+      addWrong(a + b + 1, den); // off by one
+      addWrong(correct.num + 1, correct.den); // close wrong
+      addWrong(correct.num, correct.den + 1); // wrong simplification
+      addWrong(a, den); // forgot to add
+      addWrong(b, den); // forgot to add
+    } else {
+      addWrong(a - b, a + b); // wrong denom
+      addWrong(a - b + 1, den); // off by one
+      addWrong(correct.num + 1, correct.den);
+      addWrong(a + b, den); // added instead of subtracted
+    }
+  } else {
+    const { a, b, d1, d2 } = qData;
+    const lcd = lcm(d1, d2);
+    if (qData.op === '+') {
+      addWrong(a + b, d1 + d2); // added denoms
+      addWrong(a + b, d1); // wrong lcd
+      addWrong(a + b, d2);
+      addWrong(correct.num + 1, correct.den);
+      // forgot to convert
+      addWrong(a + b, lcd);
+    } else {
+      addWrong(a - b, d1 + d2);
+      addWrong(a - b, d1);
+      addWrong(a + b, lcd);
+      addWrong(correct.num + 1, correct.den);
+    }
+  }
+
+  // Filter valid fractions and make unique
+  let wrongArr = [...wrongs].filter(s => {
+    const [n,d] = s.split('/').map(Number);
+    return n > 0 && d > 0 && n !== d && s !== correctStr;
+  });
+
+  // Shuffle and take 3
+  wrongArr = wrongArr.sort(() => Math.random() - 0.5).slice(0, 3);
+
+  // If we don't have 3, generate some more
+  const c = correct;
+  while (wrongArr.length < 3) {
+    const offsets = [-1,1,2,-2];
+    for (const off of offsets) {
+      if (wrongArr.length >= 3) break;
+      const n = c.num + off;
+      if (n > 0 && n !== c.num) {
+        const s = fractionStr(n, c.den);
+        if (s !== correctStr && !wrongArr.includes(s)) wrongArr.push(s);
+      }
+    }
+    // fallback: random fracs
+    if (wrongArr.length < 3) {
+      const n = randInt(1, 10), d = randInt(2, 12);
+      const s = simplify(n, d);
+      const str = fractionStr(s.num, s.den);
+      if (str !== correctStr && !wrongArr.includes(str)) wrongArr.push(str);
+    }
+  }
+
+  return wrongArr.slice(0, 3);
+}
+
+// ===================== GAME STATE =====================
+let gameType = '';
+let currentQ = 0;
+let score = 0;
+let totalQ = 10;
+let qData = null;
+let correctAnswer = '';
+let attemptsLeft = 2;
+let timerInterval = null;
+let timeLeft = 15;
+let soundOn = true;
+let darkMode = false;
+
+const TIMER_MAX = 15;
+const CIRCUMFERENCE = 144.51;
+
+const catConfig = {
+  'like-add':    { label: 'Like Fractions ➕', color: '#4A90E2' },
+  'like-sub':    { label: 'Like Fractions ➖', color: '#5CB85C' },
+  'unlike-add':  { label: 'Unlike Fractions ➕', color: '#9B59B6' },
+  'unlike-sub':  { label: 'Unlike Fractions ➖', color: '#F5A623' },
+};
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+  clearTimer();
+  showScreen('home-screen');
+}
+
+function startGame(type) {
+  gameType = type;
+  currentQ = 0;
+  score = 0;
+  showScreen('game-screen');
+  const cfg = catConfig[type];
+  document.getElementById('cat-badge').textContent = cfg.label;
+  document.getElementById('cat-badge').style.background = cfg.color;
+  loadQuestion();
+}
+
+function generateQuestion() {
+  switch(gameType) {
+    case 'like-add':    return generateLikeAdd();
+    case 'like-sub':    return generateLikeSub();
+    case 'unlike-add':  return generateUnlikeAdd();
+    case 'unlike-sub':  return generateUnlikeSub();
+  }
+}
+
+function makeFractionHTML(num, den) {
+  return `<div class="fraction">
+    <span class="numerator">${num}</span>
+    <div class="fraction-bar"></div>
+    <span class="denominator">${den}</span>
+  </div>`;
+}
+
+function makeAnswerFracHTML(str) {
+  const parts = str.split('/');
+  if (parts.length === 2) {
+    return `<div class="frac-display">
+      <span>${parts[0]}</span>
+      <div class="fbar"></div>
+      <span>${parts[1]}</span>
+    </div>`;
+  }
+  return `<span>${str}</span>`;
+}
+
+function loadQuestion() {
+  currentQ++;
+  attemptsLeft = 2;
+
+  document.getElementById('score-val').textContent = score;
+  document.getElementById('q-counter').textContent = `Q ${currentQ}/${totalQ}`;
+  document.getElementById('progress-fill').style.width = `${((currentQ - 1) / totalQ) * 100}%`;
+
+  document.getElementById('feedback-box').className = 'feedback-box';
+  document.getElementById('feedback-box').textContent = '';
+  document.getElementById('next-btn').className = 'next-btn';
+
+  qData = generateQuestion();
+
+  // Build equation HTML
+  let eqHTML = '';
+  if (gameType === 'like-add' || gameType === 'like-sub') {
+    eqHTML = makeFractionHTML(qData.a, qData.den);
+    eqHTML += `<span class="op-symbol">${qData.op}</span>`;
+    eqHTML += makeFractionHTML(qData.b, qData.den);
+  } else {
+    eqHTML = makeFractionHTML(qData.a, qData.d1);
+    eqHTML += `<span class="op-symbol">${qData.op}</span>`;
+    eqHTML += makeFractionHTML(qData.b, qData.d2);
+  }
+  eqHTML += `<span class="equals-sign">=</span>`;
+  eqHTML += `<span class="question-mark">?</span>`;
+  document.getElementById('fraction-eq').innerHTML = eqHTML;
+
+  // Build answers
+  const correct = qData.correct;
+  correctAnswer = fractionStr(correct.num, correct.den);
+  const wrongs = generateWrongAnswers(qData, correct, gameType);
+  const allAnswers = [correctAnswer, ...wrongs].sort(() => Math.random() - 0.5);
+
+  const grid = document.getElementById('answers-grid');
+  grid.innerHTML = '';
+  allAnswers.forEach(ans => {
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn';
+    btn.innerHTML = makeAnswerFracHTML(ans);
+    btn.dataset.ans = ans;
+    btn.addEventListener('click', () => handleAnswer(btn, ans));
+    grid.appendChild(btn);
+  });
+
+  startTimer();
+}
+
+function handleAnswer(btn, ans) {
+  // Disable all after attempt
+  if (ans === correctAnswer) {
+    clearTimer();
+    btn.classList.add('correct');
+    disableAllAnswers();
+    score++;
+    document.getElementById('score-val').textContent = score;
+    showFeedback(true);
+    document.getElementById('next-btn').className = 'next-btn show';
+    launchConfetti();
+    playSound('correct');
+  } else {
+    attemptsLeft--;
+    btn.classList.add('incorrect');
+    playSound('wrong');
+    if (attemptsLeft <= 0) {
+      clearTimer();
+      disableAllAnswers();
+      // Highlight correct
+      document.querySelectorAll('.ans-btn').forEach(b => {
+        if (b.dataset.ans === correctAnswer) b.classList.add('correct');
+      });
+      showFeedback(false, true);
+      document.getElementById('next-btn').className = 'next-btn show';
+    } else {
+      showFeedback(false, false);
+      setTimeout(() => btn.classList.remove('incorrect'), 600);
+    }
+  }
+}
+
+function disableAllAnswers() {
+  document.querySelectorAll('.ans-btn').forEach(b => {
+    b.disabled = true;
+    b.style.cursor = 'default';
+  });
+}
+
+function showFeedback(correct, final = false) {
+  const box = document.getElementById('feedback-box');
+  if (correct) {
+    box.className = 'feedback-box show success';
+    const msgs = [
+      "🌟 Brilliant! You're a Fraction Star!",
+      "🎉 Amazing work! Keep it up!",
+      "🏆 Perfect! You nailed it!",
+      "⭐ Fantastic! You're incredible!",
+      "🥳 Superb! Fraction Master in action!",
+    ];
+    box.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+  } else if (final) {
+    const correctParts = correctAnswer.split('/');
+    box.className = 'feedback-box show error';
+    box.innerHTML = `😅 The answer was <strong>${correctParts[0]}/${correctParts[1]}</strong>. Don't worry — keep practising!`;
+  } else {
+    box.className = 'feedback-box show error';
+    box.textContent = "Not quite! Try again! 💪";
+  }
+}
+
+function nextQuestion() {
+  if (currentQ >= totalQ) {
+    showResults();
+  } else {
+    loadQuestion();
+  }
+}
+
+function showResults() {
+  showScreen('results-screen');
+  document.getElementById('final-score').textContent = `${score}/${totalQ}`;
+
+  let badge, badgeName, msg;
+  const pct = score / totalQ;
+
+  if (pct === 1) {
+    badge = '🥇'; badgeName = 'Gold Fraction Master!';
+    msg = 'Amazing! You got every single question right! You are a true Fraction Superstar! 🌟';
+  } else if (pct >= 0.8) {
+    badge = '🥈'; badgeName = 'Silver Fraction Star!';
+    msg = 'Brilliant work! You really know your fractions! Just a couple more to go for Gold! 🌟';
+  } else if (pct >= 0.6) {
+    badge = '🥉'; badgeName = 'Bronze Fraction Hero!';
+    msg = 'Well done! You\'re getting the hang of it! Keep practising and you\'ll reach Gold! 💪';
+  } else {
+    badge = '📚'; badgeName = 'Fraction Learner!';
+    msg = 'Good effort! Fractions can be tricky. Have another go — you\'ll get better each time! 🌈';
+  }
+
+  document.getElementById('badge-display').textContent = badge;
+  document.getElementById('badge-name').textContent = badgeName;
+  document.getElementById('badge-name').style.color = 
+    pct === 1 ? '#F5A623' : pct >= 0.8 ? '#999' : pct >= 0.6 ? '#CD7F32' : '#4A90E2';
+  document.getElementById('final-msg').textContent = msg;
+
+  if (pct >= 0.8) launchConfetti();
+}
+
+function playAgain() {
+  startGame(gameType);
+}
+
+// ===================== TIMER =====================
+function startTimer() {
+  clearTimer();
+  timeLeft = TIMER_MAX;
+  updateTimerUI();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerUI();
+    if (timeLeft <= 0) {
+      clearTimer();
+      disableAllAnswers();
+      document.querySelectorAll('.ans-btn').forEach(b => {
+        if (b.dataset.ans === correctAnswer) b.classList.add('correct');
+      });
+      showFeedback(false, true);
+      document.getElementById('next-btn').className = 'next-btn show';
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  const circle = document.getElementById('timer-circle');
+  const textEl = document.getElementById('timer-text');
+  const offset = CIRCUMFERENCE * (1 - timeLeft / TIMER_MAX);
+  circle.style.strokeDashoffset = offset;
+  textEl.textContent = timeLeft;
+  if (timeLeft <= 5) {
+    circle.style.stroke = '#FF4444';
+    textEl.style.color = '#FF4444';
+  } else {
+    circle.style.stroke = 'var(--orange)';
+    textEl.style.color = '';
+  }
+}
+
+function clearTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+// ===================== CONFETTI =====================
+function launchConfetti() {
+  const container = document.getElementById('confetti-container');
+  const colors = ['#FF6B9D','#4A90E2','#F5A623','#5CB85C','#9B59B6','#FF8C42','#FFD700'];
+  for (let i = 0; i < 50; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = `${1.5 + Math.random() * 2}s`;
+    piece.style.animationDelay = `${Math.random() * 0.5}s`;
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.width = `${8 + Math.random() * 8}px`;
+    piece.style.height = `${8 + Math.random() * 8}px`;
+    container.appendChild(piece);
+    setTimeout(() => piece.remove(), 3500);
+  }
+}
+
+// ===================== SOUND =====================
+function playSound(type) {
+  if (!soundOn) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    if (type === 'correct') {
+      osc.frequency.setValueAtTime(523, ctx.currentTime);
+      osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+      osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.5);
+    } else {
+      osc.frequency.setValueAtTime(220, ctx.currentTime);
+      osc.frequency.setValueAtTime(180, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.3);
+    }
+  } catch(e) {}
+}
+
+// ===================== SETTINGS =====================
+document.getElementById('sound-btn').addEventListener('click', () => {
+  soundOn = !soundOn;
+  const btn = document.getElementById('sound-btn');
+  btn.textContent = soundOn ? '🔊' : '🔇';
+  btn.classList.toggle('active', !soundOn);
+});
+
+document.getElementById('dark-btn').addEventListener('click', () => {
+  darkMode = !darkMode;
+  document.body.classList.toggle('dark', darkMode);
+  document.getElementById('dark-btn').textContent = darkMode ? '☀️' : '🌙';
+  document.getElementById('dark-btn').classList.toggle('active', darkMode);
+});
+</script>
+</body>
+</html>
